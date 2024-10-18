@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cookies Game</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <audio
+      class="error-sound"
+      src="./assets/not-enough-cookie-sound.mp3"
+      controls
+    ></audio>
+    <audio class="coin-sound" src="./assets/coin-sound.mp3" controls></audio>
+    <audio
+      class="cookie-sound"
+      src="./assets/cookie-sound.mp3"
+      controls
+    ></audio>
+    <audio
+      class="background-sound"
+      src="./assets/background.mp3"
+      autoplay
+      muted
+      loop
+    ></audio>
+    <div class="header">
+      <div id="how-to-play">
+        <button onclick="popupFn()">How to play</button>
+      </div>
+      <div id="overlay"></div>
+      <div id="popupDialog">
+        <p>
+          The game produces 1 cookie per second, and you earn more with each
+          click on the 'cookie' button. To boost production, buy upgrades as you
+          collect enough cookies. For example, an 'enhanced oven' costs 500
+          cookies and increases production to 5 cookies per second. See how many
+          cookies you can create. Have fun!
+        </p>
+        <button onclick="closeFn()">close</button>
+      </div>
+      <div id="reset-btn">
+        <button>reset</button>
+        <p>this will delete all your achievements</p>
+      </div>
+      <div class="background-sound-container">
+        <button class="background-sound-btn">Sound on/off</button>
+        <input
+          class="volume-slider"
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value="1"
+        />
+      </div>
+    </div>
+    <div class="display-cookies">
+      <p id="cookies">0</p>
+      <br />
+      <h2><span id="cps">1</span> cps</h2>
+      <br />
+      <img
+        id="cookies-btn"
+        src="assets/cookies.png"
+        alt="cookie image"
+        width="200px"
+      />
+
+      <hr />
+      <h2>Upgrade list:</h2>
+      <p id="warning">Not enough cookies!!</p>
+    </div>
+    <div id="upgrades-container"></div>
+  </body>
+</html>
