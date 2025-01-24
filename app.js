@@ -24,7 +24,7 @@ function updateDisplay() {
   cookieDisplay.textContent = cookies;
   cpsDisplay.textContent = cps;
 }
-// Initialize display
+// Initialize displaymbndfmc
 updateDisplay();
 
 // Game logic
