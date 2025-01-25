@@ -15,16 +15,14 @@ const volumeControl = document.querySelector(".volume-slider");
 // Game state
 let cookies = Number(localStorage.getItem("cookies")) || 100;
 let cps = Number(localStorage.getItem("cps")) || 1;
-let quantity = Number(localStorage.getItem("originalUpgrade.quantity")) || 0;
-let originalUpgrade = JSON.parse(localStorage.getItem("originalUpgrade")) || [];
-
+let newUpgrade = JSON.parse(localStorage.getItem("newUpgrade")) || [];
 
 // Function to update and display values
 function updateDisplay() {
   cookieDisplay.textContent = cookies;
   cpsDisplay.textContent = cps;
 }
-// Initialize displaymbndfmc
+// Initialize display
 updateDisplay();
 
 // Game logic
@@ -48,7 +46,6 @@ resetBtn.addEventListener("click", function () {
   cookies = 100;
   cps = 1;
   quantity = 0;
-  // document.querySelector(".quantity").textContent = `Quantity: ${quantity}`;
   updateDisplay();
   localStorage.clear();
 });
@@ -71,53 +68,66 @@ async function fetchUpgrades() {
 // Display upgrades in the game
 function displayUpgrades(upgrades) {
   upgrades.forEach((upgrade) => {
-    
+    // Build-in JavaScript to check if newUpgrade is an array
+    if (!Array.isArray(newUpgrade)) newUpgrade = [];
+
+    // Check if this upgrade has saved data
+    // Use find() method to find the first element in the newUpgrade array that satisfies the condition
+    const savedUpgrade = newUpgrade.find((u) => u.id === upgrade.id);
+    console.log("savedUpgrade", savedUpgrade);
+    upgrade.quantity = savedUpgrade ? savedUpgrade.quantity : 0;
+
     // Create upgrade element
     const upgradeElement = document.createElement("div");
-    
     upgradeElement.classList.add("upgrade"); //for css style
-    
+
     // Add upgrade title and cost
     upgradeElement.innerHTML = `
     <h3>${upgrade.name}</h3>
     <p>Cost: 🍪${upgrade.cost}</p>
     <p>Effect: +${upgrade.increase} cps</p>
-    <p class="quantity">Quantity: 0</p>
+    <p class="quantity">Quantity: ${upgrade.quantity}</p>
     <button class='buy-upgrade'>buy</button>`;
-    
+
     // Handle upgrade purchase
     upgradeElement
-    .querySelector(".buy-upgrade")
-    .addEventListener("click", function () {
-      if (cookies >= upgrade.cost) {
-        cookies = cookies - upgrade.cost;
-        cps += upgrade.increase;
-        
-        // Update quantity of upgrade
-        const originalUpgrade = upgrades.find((target) => target.id === upgrade.id);
-        console.log("originalUpgrade", originalUpgrade);
+      .querySelector(".buy-upgrade")
+      .addEventListener("click", function () {
+        if (cookies >= upgrade.cost) {
+          cookies = cookies - upgrade.cost;
+          cps += upgrade.increase;
 
-        originalUpgrade.quantity = originalUpgrade.quantity ? originalUpgrade.quantity + 1 : 1;
-        
-        // Update the quantity display
-        upgradeElement.querySelector(".quantity").textContent = `Quantity: ${originalUpgrade.quantity}`;
-        updateDisplay();
-        
-        // Update local storage
-        localStorage.setItem("originalUpgrade",JSON.stringify(originalUpgrade.quantity));
-        // localStorage.setItem("targetID", JSON.stringify(originalUpgrade.id));
-        saveGameState();
-        
-        coinSound.play();
-        
-      } else {
-        warningDisplay.style.display = "block";
-        setTimeout(function () {
-          warningDisplay.style.display = "none";
-        }, 5000);
-        errorSound.play();
-      }
-    });
+          // Update quantity of upgrade
+          upgrade.quantity = upgrade.quantity ? upgrade.quantity + 1 : 1;
+
+          // Update the browser display
+          upgradeElement.querySelector(
+            ".quantity"
+          ).textContent = `Quantity: ${upgrade.quantity}`;
+          updateDisplay();
+
+          // Update newUpgrade array and save to local storage
+          const existingUpgradeIndex = newUpgrade.findIndex(
+            (u) => u.id === upgrade.id
+          );
+          if (existingUpgradeIndex !== -1) {
+            newUpgrade[existingUpgradeIndex].quantity = upgrade.quantity;
+          } else {
+            newUpgrade.push({ ...upgrade });
+          }
+          // console.log(newUpgrade[existingUpgradeIndex]);
+
+          saveGameState();
+
+          coinSound.play();
+        } else {
+          warningDisplay.style.display = "block";
+          setTimeout(function () {
+            warningDisplay.style.display = "none";
+          }, 5000);
+          errorSound.play();
+        }
+      });
     // Append upgrade element to container
     upgradesContainer.appendChild(upgradeElement);
   });
@@ -125,29 +135,16 @@ function displayUpgrades(upgrades) {
 
 // Function to save game state to local storage
 function saveGameState() {
-  const gameState = {
-    cookies: cookies,
-    cps: cps,
-    quantity: originalUpgrade,
-  };
-
-  console.log(gameState)
-  // localStorage.setItem("cookies", cookies);
-  // localStorage.setItem("cps", cps);
-  // localStorage.setItem("originalUpgrade", originalUpgrade);
-  localStorage.setItem("gameState", JSON.stringify(gameState));
+  localStorage.setItem("cookies", cookies);
+  localStorage.setItem("cps", cps);
+  localStorage.setItem("newUpgrade", JSON.stringify(newUpgrade));
 }
 
 function loadGameState() {
-  const savedState = localStorage.getItem("gameState");
-  if (savedState){
-    const gameStated = JSON.parse(savedState);
-    cookies = gameStated.cookies;
-    cps = gameStated.cps;
-    quantity = gameStated.quantity;
-    
-    // displayUpgrades(originalUpgrade);
-  }
+  cookies = Number(localStorage.getItem("cookies")) || 100;
+  cps = Number(localStorage.getItem("cps")) || 1;
+  newUpgrade = JSON.parse(localStorage.getItem("newUpgrade")) || [];
+  updateDisplay();
 }
 
 // Fetch upgrades when the game starts
